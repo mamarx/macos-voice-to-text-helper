@@ -13,6 +13,9 @@ final class AudioCaptureManager {
     /// URL of the most recent completed recording.
     private(set) var lastRecordingURL: URL?
 
+    /// Optional codeword detector that receives audio buffers during recording.
+    var codewordDetector: CodewordDetector?
+
     /// The audio engine used for microphone capture.
     private let audioEngine = AVAudioEngine()
 
@@ -135,6 +138,19 @@ final class AudioCaptureManager {
                 try audioFile.write(from: convertedBuffer)
             } catch {
                 print("[AudioCaptureManager] Write error: \(error)")
+            }
+
+            // Forward audio to codeword detector for live analysis
+            if let detector = self.codewordDetector, detector.isActive {
+                // Convert Int16 PCM samples to Float [-1.0, 1.0] for the detector
+                if let channelData = convertedBuffer.int16ChannelData {
+                    let frameCount = Int(convertedBuffer.frameLength)
+                    var floatSamples = [Float](repeating: 0, count: frameCount)
+                    for i in 0..<frameCount {
+                        floatSamples[i] = Float(channelData.pointee[i]) / 32768.0
+                    }
+                    detector.appendAudio(floatSamples)
+                }
             }
         }
 

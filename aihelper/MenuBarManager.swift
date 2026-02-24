@@ -25,6 +25,9 @@ final class MenuBarManager: ObservableObject {
     /// Text insertion manager — inserts transcribed text at cursor via CGEvent.
     private let textInsertionManager = TextInsertionManager()
 
+    /// Codeword detector — listens for the stop word during recording.
+    private let codewordDetector = CodewordDetector()
+
     /// Centralized settings — codeword, autoEnter, insertionMethod, overlay toggle.
     /// Stored here so other plans (02, 03) can read settings from the pipeline orchestrator.
     let settings = SettingsManager.shared
@@ -101,12 +104,23 @@ final class MenuBarManager: ObservableObject {
             return
         }
 
+        audioCaptureManager.codewordDetector = codewordDetector
+        codewordDetector.onCodewordDetected = { [weak self] in
+            DispatchQueue.main.async {
+                self?.stopRecording()
+            }
+        }
+        codewordDetector.start(modelPath: ModelManager.shared.modelPath)
+
         audioCaptureManager.startCapture()
         isRecording = true
         print("[MenuBarManager] Recording started")
     }
 
     private func stopRecording() {
+        codewordDetector.stop()
+        audioCaptureManager.codewordDetector = nil
+
         let url = audioCaptureManager.stopCapture()
         isRecording = false
 
@@ -135,7 +149,22 @@ final class MenuBarManager: ObservableObject {
             DispatchQueue.main.async {
                 self.isTranscribing = false
 
-                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                var trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                // Strip codeword from end of transcription
+                let codeword = SettingsManager.shared.codeword.lowercased()
+                if !codeword.isEmpty {
+                    // Handle "over." with trailing punctuation first (longer match)
+                    let codewordWithPunctuation = codeword + "."
+                    if trimmed.lowercased().hasSuffix(codewordWithPunctuation) {
+                        trimmed = String(trimmed.dropLast(codewordWithPunctuation.count))
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                    } else if trimmed.lowercased().hasSuffix(codeword) {
+                        trimmed = String(trimmed.dropLast(codeword.count))
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+
                 if !trimmed.isEmpty {
                     self.textInsertionManager.insertText(trimmed)
                     print("[MenuBarManager] Inserted text: \(trimmed)")
