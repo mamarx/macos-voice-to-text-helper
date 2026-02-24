@@ -19,8 +19,8 @@ final class CodewordDetector {
     /// Rolling buffer of 16kHz mono Float samples.
     private var audioBuffer: [Float] = []
 
-    /// Maximum buffer size: ~4 seconds at 16kHz (enough for detection with margin).
-    private let maxBufferSamples = 16000 * 4
+    /// Maximum buffer size: ~2 seconds at 16kHz (short buffer for fast detection).
+    private let maxBufferSamples = 16000 * 2
 
     /// Whisper context for codeword detection (separate from main transcription context).
     private var whisperContext: OpaquePointer?
@@ -59,9 +59,9 @@ final class CodewordDetector {
             audioBuffer.removeAll()
             isActive = true
 
-            // Schedule periodic detection every 2 seconds
+            // Schedule periodic detection every 1 second
             let timer = DispatchSource.makeTimerSource(queue: queue)
-            timer.schedule(deadline: .now() + 2.0, repeating: 2.0)
+            timer.schedule(deadline: .now() + 1.0, repeating: 1.0)
             timer.setEventHandler { [weak self] in
                 self?.checkForCodeword()
             }
@@ -134,9 +134,10 @@ final class CodewordDetector {
         params.print_special = false
         params.translate = false
         params.language = nil  // Auto-detect (German + English)
-        params.n_threads = 4   // Fewer threads since running alongside main capture
+        params.n_threads = 6
         params.no_context = true
-        params.single_segment = true  // Only need one segment for short buffer
+        params.single_segment = true
+        params.audio_ctx = 512  // Limit audio context for shorter processing
 
         // Run transcription on buffer contents
         let result = audioBuffer.withUnsafeBufferPointer { bufferPointer in
