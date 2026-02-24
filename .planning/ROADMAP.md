@@ -59,10 +59,12 @@ Plans:
   2. A floating overlay appears during recording showing a visual indicator (waveform or status) without stealing focus
   3. Settings panel is accessible from the menu bar with options for hotkey, codeword, insertion method, and auto-Enter toggle
   4. User can toggle auto-send Enter after text insertion and see it take effect immediately
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Settings infrastructure, settings panel UI, and auto-Enter wiring
+- [ ] 03-02-PLAN.md — Live codeword detection via rolling buffer whisper transcription
+- [ ] 03-03-PLAN.md — Floating recording overlay with pulsing indicator
 
 ## Progress
 
@@ -73,4 +75,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
 | 2. Transcription & Text Insertion | 2/2 | Complete | 2026-02-24 |
-| 3. Codeword, Overlay & Settings | 0/0 | Not started | - |
+| 3. Codeword, Overlay & Settings | 0/3 | In progress | - |
