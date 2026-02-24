@@ -31,7 +31,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **UI-01**: App runs as a macOS menu bar app (no dock icon)
 - [x] **UI-02**: Menu bar icon indicates current state (idle, recording, transcribing)
-- [ ] **UI-03**: Mini floating overlay appears during recording showing status/waveform
+- [x] **UI-03**: Mini floating overlay appears during recording showing status/waveform
 - [x] **UI-04**: Settings panel accessible from menu bar for configuring hotkey, codeword, Enter toggle, insertion method
 
 ## v2 Requirements
@@ -81,7 +81,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INS-03 | Phase 3 | Complete |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 1 | Complete |
-| UI-03 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Complete |
 | UI-04 | Phase 3 | Complete |
 
 **Coverage:**

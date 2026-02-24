@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: App Shell & Audio Capture** - Menu bar app with global hotkey recording
 - [x] **Phase 2: Transcription & Text Insertion** - Whisper transcription with cursor-position output
-- [ ] **Phase 3: Codeword, Overlay & Settings** - Live stop-word detection, recording UI, and configuration
+- [x] **Phase 3: Codeword, Overlay & Settings** - Live stop-word detection, recording UI, and configuration
 
 ## Phase Details
 
@@ -63,8 +63,8 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Settings infrastructure, settings panel UI, and auto-Enter wiring
-- [ ] 03-02-PLAN.md — Live codeword detection via rolling buffer whisper transcription
-- [ ] 03-03-PLAN.md — Floating recording overlay with pulsing indicator
+- [x] 03-02-PLAN.md — Live codeword detection via rolling buffer whisper transcription
+- [x] 03-03-PLAN.md — Floating recording overlay with pulsing indicator
 
 ## Progress
 
@@ -75,4 +75,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
 | 2. Transcription & Text Insertion | 2/2 | Complete | 2026-02-24 |
-| 3. Codeword, Overlay & Settings | 1/3 | In Progress | - |
+| 3. Codeword, Overlay & Settings | 3/3 | Complete   | 2026-02-24 |

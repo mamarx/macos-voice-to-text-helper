@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 of 3 (Codeword, Overlay & Settings)
-Plan: 2 of 3 in current phase
-Status: Executing Phase 3
-Last activity: 2026-02-24 -- Completed 03-02-PLAN.md (live codeword detection with rolling buffer whisper transcription)
+Plan: 3 of 3 in current phase
+Status: Phase 3 Complete -- All phases complete
+Last activity: 2026-02-24 -- Completed 03-03-PLAN.md (floating recording overlay with pulsing indicator)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3min
-- Total execution time: 0.25 hours
+- Total plans completed: 7
+- Average duration: 2min
+- Total execution time: 0.28 hours
 
 **By Phase:**
 
@@ -33,6 +33,7 @@ Progress: [█████████░] 93%
 | Phase 02 P02 | 2min | 2 tasks | 3 files |
 | Phase 03 P01 | 2min | 2 tasks | 5 files |
 | Phase 03 P02 | 2min | 2 tasks | 3 files |
+| Phase 03 P03 | 2min | 3 tasks | 4 files |
 
 **Recent Trend:**
 - Last 5 plans: 2min, 2min, 2min, 2min, 2min
@@ -57,12 +58,13 @@ Recent decisions affecting current work:
 - [Phase 02]: CGEvent typing simulation as primary text insertion with clipboard paste fallback for robustness
 - [Phase 02]: Model initialization dispatched from MenuBarManager.init() via Task for cleanest @StateObject timing
 - [Phase 03]: Used @AppStorage on SettingsManager singleton for automatic UserDefaults persistence with SwiftUI reactivity
-- [Phase 03]: Used Window scene with openWindow(id:) instead of Settings scene -- Settings scene conflicts with menu-bar-only apps
-- [Phase 03]: Extracted MenuBarContentView from App body to enable @Environment(\.openWindow) in menu bar dropdown
+- [Phase 03]: Replaced Window scene + openWindow(id:) with direct NSWindow via SettingsWindowController -- openWindow unreliable in LSUIElement apps
 - [Phase 03]: InsertionMethod as String-backed enum for direct @AppStorage compatibility
 - [Phase 03]: Used class (not actor) for CodewordDetector with serial DispatchQueue -- audio tap requires synchronous appendAudio
 - [Phase 03]: Separate whisper context per detection session -- lightweight, OS memory-maps model weights
 - [Phase 03]: 2-second detection interval with 4-second rolling buffer for codeword latency/CPU balance
+- [Phase 03]: NSPanel with .nonActivatingPanel + .borderless for floating overlay that never steals focus
+- [Phase 03]: canJoinAllSpaces + fullScreenAuxiliary for overlay visible on all Spaces and over fullscreen apps
 
 ### Pending Todos
 
@@ -75,5 +77,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-02-PLAN.md (live codeword detection with rolling buffer whisper transcription)
+Stopped at: Completed 03-03-PLAN.md (floating recording overlay with pulsing indicator) -- All plans complete
 Resume file: None
