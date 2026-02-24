@@ -44,10 +44,11 @@ Plans:
   3. Transcribed text is inserted at the current cursor position in the active application
   4. If typing simulation fails, text is pasted via Cmd+V as fallback
   5. German and English speech are both transcribed correctly without manual language selection
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — whisper.cpp SPM integration, TranscriptionManager, and model download
+- [ ] 02-02-PLAN.md — Text insertion at cursor and end-to-end pipeline wiring
 
 ### Phase 3: Codeword, Overlay & Settings
 **Goal**: User can stop recording by voice, see recording status visually, and configure all preferences
@@ -71,5 +72,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
-| 2. Transcription & Text Insertion | 0/0 | Not started | - |
+| 2. Transcription & Text Insertion | 0/2 | In Progress | - |
 | 3. Codeword, Overlay & Settings | 0/0 | Not started | - |
