@@ -28,10 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can press a global hotkey from any application to start recording
   4. User can press the same hotkey again to stop recording
   5. Audio is captured from the microphone and saved to a usable format during recording
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Swift project setup and menu bar app shell with dynamic status icon
+- [ ] 01-02-PLAN.md — Global hotkey registration and microphone audio capture to WAV
 
 ### Phase 2: Transcription & Text Insertion
 **Goal**: Recorded speech is transcribed locally and the text appears at the user's cursor
@@ -69,6 +70,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. App Shell & Audio Capture | 0/0 | Not started | - |
+| 1. App Shell & Audio Capture | 0/2 | Planned | - |
 | 2. Transcription & Text Insertion | 0/0 | Not started | - |
 | 3. Codeword, Overlay & Settings | 0/0 | Not started | - |
