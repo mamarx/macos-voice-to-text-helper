@@ -17,9 +17,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Transcription
 
-- [ ] **TRX-01**: App transcribes recorded audio using locally embedded whisper.cpp model
-- [ ] **TRX-02**: Transcription completes within 3 seconds for utterances under 30 seconds
-- [ ] **TRX-03**: App automatically detects spoken language (German and English primarily)
+- [x] **TRX-01**: App transcribes recorded audio using locally embedded whisper.cpp model
+- [x] **TRX-02**: Transcription completes within 3 seconds for utterances under 30 seconds
+- [x] **TRX-03**: App automatically detects spoken language (German and English primarily)
 
 ### Text Insertion
 
@@ -73,9 +73,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REC-03 | Phase 3 | Pending |
 | REC-04 | Phase 3 | Pending |
 | REC-05 | Phase 1 | Complete |
-| TRX-01 | Phase 2 | Pending |
-| TRX-02 | Phase 2 | Pending |
-| TRX-03 | Phase 2 | Pending |
+| TRX-01 | Phase 2 | Complete |
+| TRX-02 | Phase 2 | Complete |
+| TRX-03 | Phase 2 | Complete |
 | INS-01 | Phase 2 | Pending |
 | INS-02 | Phase 2 | Pending |
 | INS-03 | Phase 3 | Pending |
@@ -91,4 +91,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after roadmap creation*
+*Last updated: 2026-02-24 after 02-01-PLAN completion*

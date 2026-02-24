@@ -47,7 +47,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — whisper.cpp SPM integration, TranscriptionManager, and model download
+- [x] 02-01-PLAN.md — whisper.cpp SPM integration, TranscriptionManager, and model download
 - [ ] 02-02-PLAN.md — Text insertion at cursor and end-to-end pipeline wiring
 
 ### Phase 3: Codeword, Overlay & Settings
@@ -72,5 +72,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
-| 2. Transcription & Text Insertion | 0/2 | In Progress | - |
+| 2. Transcription & Text Insertion | 1/2 | In Progress | - |
 | 3. Codeword, Overlay & Settings | 0/0 | Not started | - |
