@@ -2,10 +2,10 @@ import Cocoa
 
 /// Inserts transcribed text at the current cursor position in the active application.
 ///
-/// Uses CGEvent-based typing simulation as the primary method. Falls back to
-/// clipboard paste (Cmd+V) if typing simulation fails (e.g. when target app
-/// rejects synthetic events or Accessibility permission is insufficient for
-/// event posting).
+/// Respects `SettingsManager.shared.insertionMethod` to choose between CGEvent typing
+/// simulation and clipboard paste. When typing is selected, falls back to clipboard
+/// paste if CGEvent creation fails. After successful insertion, optionally simulates
+/// a Return key press when `SettingsManager.shared.autoEnterEnabled` is true.
 ///
 /// Both methods require Accessibility permission, which is already requested
 /// by HotkeyManager on app launch for CGEvent tap.
@@ -13,17 +13,32 @@ final class TextInsertionManager {
 
     /// Inserts the given text at the current cursor position.
     ///
-    /// Tries CGEvent keystroke simulation first (preserves clipboard contents).
-    /// Falls back to Cmd+V paste if any CGEvent creation returns nil.
+    /// Respects the user's insertion method preference from settings:
+    /// - `.typing`: tries CGEvent keystroke simulation first, falls back to clipboard paste.
+    /// - `.clipboard`: goes directly to clipboard paste.
+    ///
+    /// After successful insertion, simulates Return key if auto-Enter is enabled.
     ///
     /// - Parameter text: The text string to insert.
     func insertText(_ text: String) {
         guard !text.isEmpty else { return }
 
-        // Try typing simulation first
-        if !insertViaTypingSimulation(text) {
-            print("[TextInsertionManager] Typing simulation failed, falling back to clipboard paste")
+        let settings = SettingsManager.shared
+
+        switch settings.insertionMethod {
+        case .typing:
+            // Try typing simulation first, fall back to clipboard paste
+            if !insertViaTypingSimulation(text) {
+                print("[TextInsertionManager] Typing simulation failed, falling back to clipboard paste")
+                insertViaClipboardPaste(text)
+            }
+        case .clipboard:
             insertViaClipboardPaste(text)
+        }
+
+        // Simulate Return key after insertion if auto-Enter is enabled
+        if settings.autoEnterEnabled {
+            simulateReturnKey()
         }
     }
 
@@ -100,5 +115,27 @@ final class TextInsertionManager {
             pasteboard.clearContents()
             pasteboard.setString(previous, forType: .string)
         }
+    }
+
+    // MARK: - Auto-Enter: Return Key Simulation
+
+    /// Simulates pressing the Return key via CGEvent keyDown + keyUp.
+    ///
+    /// Virtual key code 36 = Return key on macOS.
+    /// Posted to `.cghidEventTap` so it reaches the active application.
+    /// Small delay before pressing to let the preceding text insertion settle.
+    private func simulateReturnKey() {
+        // Brief pause so the text insertion completes before Enter
+        usleep(50_000)  // 50ms
+
+        guard let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: 36, keyDown: true),
+              let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: 36, keyDown: false) else {
+            print("[TextInsertionManager] Failed to create Return key CGEvent")
+            return
+        }
+
+        keyDown.post(tap: .cghidEventTap)
+        keyUp.post(tap: .cghidEventTap)
+        print("[TextInsertionManager] Simulated Return key press (auto-Enter)")
     }
 }

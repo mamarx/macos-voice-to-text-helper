@@ -25,6 +25,10 @@ final class MenuBarManager: ObservableObject {
     /// Text insertion manager — inserts transcribed text at cursor via CGEvent.
     private let textInsertionManager = TextInsertionManager()
 
+    /// Centralized settings — codeword, autoEnter, insertionMethod, overlay toggle.
+    /// Stored here so other plans (02, 03) can read settings from the pipeline orchestrator.
+    let settings = SettingsManager.shared
+
     /// Whether microphone permission has been granted.
     private var microphonePermissionGranted: Bool = false
 
