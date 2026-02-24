@@ -13,7 +13,7 @@ Three phases deliver the core voice-to-text loop on macOS. Phase 1 builds a menu
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: App Shell & Audio Capture** - Menu bar app with global hotkey recording
-- [ ] **Phase 2: Transcription & Text Insertion** - Whisper transcription with cursor-position output
+- [x] **Phase 2: Transcription & Text Insertion** - Whisper transcription with cursor-position output
 - [ ] **Phase 3: Codeword, Overlay & Settings** - Live stop-word detection, recording UI, and configuration
 
 ## Phase Details
@@ -48,7 +48,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — whisper.cpp SPM integration, TranscriptionManager, and model download
-- [ ] 02-02-PLAN.md — Text insertion at cursor and end-to-end pipeline wiring
+- [x] 02-02-PLAN.md — Text insertion at cursor and end-to-end pipeline wiring
 
 ### Phase 3: Codeword, Overlay & Settings
 **Goal**: User can stop recording by voice, see recording status visually, and configure all preferences
@@ -72,5 +72,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
-| 2. Transcription & Text Insertion | 1/2 | In Progress | - |
+| 2. Transcription & Text Insertion | 2/2 | Complete | 2026-02-24 |
 | 3. Codeword, Overlay & Settings | 0/0 | Not started | - |

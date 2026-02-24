@@ -54,7 +54,7 @@ completed: 2026-02-24
 - **Duration:** ~2 min
 - **Started:** 2026-02-24T09:35:36Z
 - **Completed:** 2026-02-24T09:37:26Z
-- **Tasks:** 2 auto tasks completed (1 checkpoint awaiting human verification)
+- **Tasks:** 3/3 completed (2 auto + 1 checkpoint approved)
 - **Files modified:** 3
 
 ## Accomplishments
@@ -70,6 +70,7 @@ Each task was committed atomically:
 
 1. **Task 1: Create TextInsertionManager with typing simulation and clipboard fallback** - `1ca175b` (feat)
 2. **Task 2: Wire end-to-end pipeline in MenuBarManager and initialize model on launch** - `3ca16fd` (feat)
+3. **Task 3: Verify complete voice-to-text pipeline end-to-end** - checkpoint approved (human-verify)
 
 ## Files Created/Modified
 - `aihelper/TextInsertionManager.swift` - CGEvent typing simulation per Unicode scalar with clipboard paste (Cmd+V) fallback and clipboard save/restore
