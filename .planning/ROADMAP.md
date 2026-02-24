@@ -75,4 +75,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. App Shell & Audio Capture | 2/2 | Complete | 2026-02-24 |
 | 2. Transcription & Text Insertion | 2/2 | Complete | 2026-02-24 |
-| 3. Codeword, Overlay & Settings | 3/3 | Complete   | 2026-02-24 |
+| 3. Codeword, Overlay & Settings | 3/3 | Complete    | 2026-02-24 |
