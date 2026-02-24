@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [Phase 03]: 2-second detection interval with 4-second rolling buffer for codeword latency/CPU balance
 - [Phase 03]: NSPanel with .nonActivatingPanel + .borderless for floating overlay that never steals focus
 - [Phase 03]: canJoinAllSpaces + fullScreenAuxiliary for overlay visible on all Spaces and over fullscreen apps
+- [Phase quick-1]: Use ggml-tiny for codeword detection, keep ggml-base for main transcription -- 5x faster inference for periodic detection
+- [Phase quick-1]: Pre-warm codeword context at app launch, reuse across sessions -- zero per-session overhead
+- [Phase quick-1]: In-memory transcription pipeline: accumulate Float samples, skip disk I/O and format conversion
 
 ### Pending Todos
 
@@ -77,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-03-PLAN.md (floating recording overlay with pulsing indicator) -- All plans complete
+Stopped at: Completed quick-1 speed optimization plan (ggml-tiny codeword, pre-warmed context, in-memory transcription)
 Resume file: None
