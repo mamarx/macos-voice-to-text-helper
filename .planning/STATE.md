@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 Phase: 3 of 3 (Codeword, Overlay & Settings)
 Plan: 3 of 3 in current phase
 Status: Phase 3 Complete -- All phases complete
-Last activity: 2026-02-24 -- Completed 03-03-PLAN.md (floating recording overlay with pulsing indicator)
+Last activity: 2026-02-24 - Completed quick task 1: Speed optimization — faster codeword detection and speech processing
 
 Progress: [██████████] 100%
 
@@ -76,6 +76,12 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Speed optimization — faster codeword detection and speech processing | 2026-02-24 | 4d6213d | [1-speed-optimization-faster-codeword-detec](./quick/1-speed-optimization-faster-codeword-detec/) |
 
 ## Session Continuity
 
