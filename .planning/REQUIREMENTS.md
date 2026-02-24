@@ -1,0 +1,94 @@
+# Requirements: aihelper
+
+**Defined:** 2026-02-24
+**Core Value:** Press a hotkey, speak, and the text appears where your cursor is — reliably, locally, without any cloud dependency.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Recording & Control
+
+- [ ] **REC-01**: User can start voice recording with a global hotkey from any app
+- [ ] **REC-02**: User can stop voice recording by pressing the global hotkey again
+- [ ] **REC-03**: User can stop voice recording by saying a codeword (default: "over") detected live during recording
+- [ ] **REC-04**: User can configure the stop codeword in settings
+- [ ] **REC-05**: App captures microphone audio during recording
+
+### Transcription
+
+- [ ] **TRX-01**: App transcribes recorded audio using locally embedded whisper.cpp model
+- [ ] **TRX-02**: Transcription completes within 3 seconds for utterances under 30 seconds
+- [ ] **TRX-03**: App automatically detects spoken language (German and English primarily)
+
+### Text Insertion
+
+- [ ] **INS-01**: Transcribed text is inserted at the current cursor position in the active app (simulated typing)
+- [ ] **INS-02**: App falls back to clipboard paste (Cmd+V) when typing simulation fails
+- [ ] **INS-03**: User can toggle auto-send Enter after text insertion in settings
+
+### UI & Feedback
+
+- [ ] **UI-01**: App runs as a macOS menu bar app (no dock icon)
+- [ ] **UI-02**: Menu bar icon indicates current state (idle, recording, transcribing)
+- [ ] **UI-03**: Mini floating overlay appears during recording showing status/waveform
+- [ ] **UI-04**: Settings panel accessible from menu bar for configuring hotkey, codeword, Enter toggle, insertion method
+
+## v2 Requirements
+
+### Enhanced Transcription
+
+- **TRX-04**: User can select Whisper model size (tiny/base/small/medium) in settings
+- **TRX-05**: App supports custom vocabulary / proper noun hints
+
+### Quality of Life
+
+- **QOL-01**: App auto-starts on login
+- **QOL-02**: Onboarding flow for first launch (permissions, hotkey setup)
+- **QOL-03**: History of recent transcriptions accessible from menu bar
+
+### Advanced Features
+
+- **ADV-01**: AI post-processing for punctuation/formatting improvement
+- **ADV-02**: Text correction/rephrasing via LLM before insertion
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Cloud-based speech recognition | Core promise is local/private processing |
+| Cross-platform (Windows/Linux) | macOS native first, other platforms later |
+| Real-time streaming transcription display | Adds complexity, batch transcription sufficient for v1 |
+| Multiple simultaneous audio sources | Single microphone input sufficient |
+| Voice commands beyond stop-word | Not a voice assistant, just voice-to-text |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| REC-01 | — | Pending |
+| REC-02 | — | Pending |
+| REC-03 | — | Pending |
+| REC-04 | — | Pending |
+| REC-05 | — | Pending |
+| TRX-01 | — | Pending |
+| TRX-02 | — | Pending |
+| TRX-03 | — | Pending |
+| INS-01 | — | Pending |
+| INS-02 | — | Pending |
+| INS-03 | — | Pending |
+| UI-01 | — | Pending |
+| UI-02 | — | Pending |
+| UI-03 | — | Pending |
+| UI-04 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15 ⚠️
+
+---
+*Requirements defined: 2026-02-24*
+*Last updated: 2026-02-24 after initial definition*
