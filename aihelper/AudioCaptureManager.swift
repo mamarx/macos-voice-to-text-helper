@@ -1,10 +1,12 @@
 import AVFoundation
 
-/// Captures microphone audio and writes it to a WAV file.
+/// Captures microphone audio and writes it to a WAV file, while also accumulating
+/// Float samples in memory for direct transcription (skipping disk I/O).
 ///
 /// Uses AVAudioEngine to capture from the default input device,
 /// converts to 16kHz mono 16-bit PCM (the format whisper.cpp expects),
-/// and writes to a temporary WAV file via AVAudioFile.
+/// and writes to a temporary WAV file via AVAudioFile as a backup artifact.
+/// Float samples are accumulated in memory alongside for zero-copy transcription.
 final class AudioCaptureManager {
 
     /// Whether audio capture is currently active.
@@ -21,6 +23,10 @@ final class AudioCaptureManager {
 
     /// The output file being written to during capture.
     private var audioFile: AVAudioFile?
+
+    /// Accumulated Float samples in memory for direct transcription.
+    /// Eliminates the need to read back from WAV file and convert Int16->Float.
+    private var accumulatedSamples: [Float] = []
 
     /// Target audio format: 16kHz, mono, 16-bit integer PCM.
     /// This is the format whisper.cpp expects in Phase 2.
@@ -55,12 +61,30 @@ final class AudioCaptureManager {
         }
     }
 
+    // MARK: - In-Memory Samples
+
+    /// Returns the accumulated Float samples collected during the recording session.
+    ///
+    /// Call after `stopCapture()` but before `clearAccumulatedSamples()`.
+    /// These samples are in [-1.0, 1.0] range at 16kHz mono -- ready for whisper.
+    func getAccumulatedSamples() -> [Float] {
+        return accumulatedSamples
+    }
+
+    /// Clears the accumulated sample buffer.
+    ///
+    /// Call after transcription completes to free memory.
+    func clearAccumulatedSamples() {
+        accumulatedSamples.removeAll()
+    }
+
     // MARK: - Start / Stop Capture
 
     /// Starts capturing audio from the microphone.
     ///
     /// Creates a WAV file in the temporary directory and begins writing
-    /// audio buffers converted to 16kHz mono 16-bit PCM.
+    /// audio buffers converted to 16kHz mono 16-bit PCM. Also accumulates
+    /// Float samples in memory for direct transcription.
     func startCapture() {
         guard !isCapturing else {
             print("[AudioCaptureManager] Already capturing")
@@ -71,6 +95,9 @@ final class AudioCaptureManager {
             print("[AudioCaptureManager] Failed to create target audio format")
             return
         }
+
+        // Clear accumulated samples from previous session
+        accumulatedSamples.removeAll()
 
         // Create output file path
         let timestamp = Date().timeIntervalSince1970
@@ -133,22 +160,26 @@ final class AudioCaptureManager {
                 return
             }
 
-            // Write converted buffer to file
+            // Write converted buffer to file (kept as backup artifact)
             do {
                 try audioFile.write(from: convertedBuffer)
             } catch {
                 print("[AudioCaptureManager] Write error: \(error)")
             }
 
-            // Forward audio to codeword detector for live analysis
-            if let detector = self.codewordDetector, detector.isActive {
-                // Convert Int16 PCM samples to Float [-1.0, 1.0] for the detector
-                if let channelData = convertedBuffer.int16ChannelData {
-                    let frameCount = Int(convertedBuffer.frameLength)
-                    var floatSamples = [Float](repeating: 0, count: frameCount)
-                    for i in 0..<frameCount {
-                        floatSamples[i] = Float(channelData.pointee[i]) / 32768.0
-                    }
+            // Convert Int16 PCM to Float once, reuse for both accumulation and codeword detection
+            if let channelData = convertedBuffer.int16ChannelData {
+                let frameCount = Int(convertedBuffer.frameLength)
+                var floatSamples = [Float](repeating: 0, count: frameCount)
+                for i in 0..<frameCount {
+                    floatSamples[i] = Float(channelData.pointee[i]) / 32768.0
+                }
+
+                // Accumulate for post-recording transcription
+                self.accumulatedSamples.append(contentsOf: floatSamples)
+
+                // Forward to codeword detector for live analysis
+                if let detector = self.codewordDetector, detector.isActive {
                     detector.appendAudio(floatSamples)
                 }
             }
@@ -166,6 +197,9 @@ final class AudioCaptureManager {
     }
 
     /// Stops capturing audio and returns the URL of the completed recording.
+    ///
+    /// Does NOT clear accumulatedSamples -- call `getAccumulatedSamples()` first,
+    /// then `clearAccumulatedSamples()` after transcription completes.
     @discardableResult
     func stopCapture() -> URL? {
         guard isCapturing else {
@@ -184,7 +218,7 @@ final class AudioCaptureManager {
 
         if let url = fileURL {
             lastRecordingURL = url
-            print("[AudioCaptureManager] Capture stopped. File: \(url.path)")
+            print("[AudioCaptureManager] Capture stopped. File: \(url.path) | Samples in memory: \(accumulatedSamples.count)")
             return url
         }
 

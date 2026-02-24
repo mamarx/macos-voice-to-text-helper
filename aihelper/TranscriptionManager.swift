@@ -102,6 +102,52 @@ actor TranscriptionManager {
 
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    /// Transcribes speech from in-memory Float samples to text.
+    ///
+    /// Accepts pre-converted Float samples directly, skipping disk I/O (WAV file read)
+    /// and Int16->Float conversion entirely. This saves 50-200ms depending on recording length.
+    ///
+    /// - Parameter samples: Array of Float samples in [-1.0, 1.0] range at 16kHz mono.
+    /// - Returns: The transcribed text string.
+    /// - Throws: If transcription fails.
+    func transcribe(samples: [Float]) async throws -> String {
+        guard !samples.isEmpty else {
+            throw TranscriptionError.invalidAudioFile(reason: "No audio samples provided")
+        }
+
+        // Configure whisper parameters (same as file-based, language auto-detect)
+        var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
+        params.print_realtime = false
+        params.print_progress = false
+        params.print_timestamps = false
+        params.print_special = false
+        params.translate = false
+        params.language = nil  // Auto-detect language (German + English)
+        params.n_threads = Int32(max(1, min(8, ProcessInfo.processInfo.processorCount - 2)))
+        params.no_context = true
+        params.single_segment = false
+
+        // Run transcription directly on in-memory samples
+        let result = samples.withUnsafeBufferPointer { bufferPointer in
+            whisper_full(context, params, bufferPointer.baseAddress, Int32(bufferPointer.count))
+        }
+
+        guard result == 0 else {
+            throw TranscriptionError.transcriptionFailed(code: Int(result))
+        }
+
+        // Collect transcribed text from all segments
+        let segmentCount = whisper_full_n_segments(context)
+        var text = ""
+        for i in 0..<segmentCount {
+            if let segmentText = whisper_full_get_segment_text(context, i) {
+                text += String(cString: segmentText)
+            }
+        }
+
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
 
 // MARK: - Errors

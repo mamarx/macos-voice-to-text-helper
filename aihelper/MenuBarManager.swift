@@ -162,6 +162,7 @@ final class MenuBarManager: ObservableObject {
         audioCaptureManager.codewordDetector = nil
 
         let url = audioCaptureManager.stopCapture()
+        let samples = audioCaptureManager.getAccumulatedSamples()
         isRecording = false
 
         guard let url = url else {
@@ -171,20 +172,22 @@ final class MenuBarManager: ObservableObject {
 
         guard transcriptionManager != nil else {
             print("[MenuBarManager] Warning: transcription model not loaded yet — audio file discarded")
+            audioCaptureManager.clearAccumulatedSamples()
             return
         }
 
-        // Enter transcribing state and process the recording
-        DispatchQueue.main.async {
-            self.isTranscribing = true
-        }
-        Task { await self.processRecording(url: url) }
+        // Enter transcribing state and process the recording using in-memory samples
+        isTranscribing = true
+        Task { await self.processRecording(samples: samples, url: url) }
     }
 
-    /// Transcribes the audio file and inserts the resulting text at the cursor.
-    private func processRecording(url: URL) async {
+    /// Transcribes in-memory audio samples and inserts the resulting text at the cursor.
+    ///
+    /// Uses accumulated Float samples directly (no disk read or format conversion needed).
+    /// The WAV file URL is kept for cleanup only.
+    private func processRecording(samples: [Float], url: URL) async {
         do {
-            let text = try await transcriptionManager!.transcribe(audioURL: url)
+            let text = try await transcriptionManager!.transcribe(samples: samples)
 
             DispatchQueue.main.async {
                 self.isTranscribing = false
@@ -213,13 +216,15 @@ final class MenuBarManager: ObservableObject {
                 }
             }
 
-            // Clean up temporary WAV file
+            // Clean up: free accumulated samples and remove temporary WAV file
+            audioCaptureManager.clearAccumulatedSamples()
             try? FileManager.default.removeItem(at: url)
 
         } catch {
             DispatchQueue.main.async {
                 self.isTranscribing = false
             }
+            audioCaptureManager.clearAccumulatedSamples()
             print("[MenuBarManager] Transcription error: \(error)")
         }
     }
