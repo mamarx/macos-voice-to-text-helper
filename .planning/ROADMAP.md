@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Swift project setup and menu bar app shell with dynamic status icon
+- [x] 01-01-PLAN.md — Swift project setup and menu bar app shell with dynamic status icon
 - [ ] 01-02-PLAN.md — Global hotkey registration and microphone audio capture to WAV
 
 ### Phase 2: Transcription & Text Insertion
@@ -70,6 +70,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. App Shell & Audio Capture | 0/2 | Planned | - |
+| 1. App Shell & Audio Capture | 1/2 | In Progress | - |
 | 2. Transcription & Text Insertion | 0/0 | Not started | - |
 | 3. Codeword, Overlay & Settings | 0/0 | Not started | - |
