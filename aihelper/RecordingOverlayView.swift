@@ -31,6 +31,7 @@ struct RecordingOverlayView: View {
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color.black.opacity(0.75))
         )
+        .fixedSize()
         .onAppear {
             isPulsing = true
         }

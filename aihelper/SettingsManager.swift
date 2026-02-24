@@ -17,19 +17,35 @@ enum InsertionMethod: String, CaseIterable {
 final class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
 
+    private static let defaults = UserDefaults.standard
+
     /// The codeword that stops recording when spoken (e.g. "over").
-    @AppStorage("codeword") var codeword: String = "over"
+    @Published var codeword: String {
+        didSet { Self.defaults.set(codeword, forKey: "codeword") }
+    }
 
     /// Whether to simulate pressing Return after inserting transcribed text.
-    @AppStorage("autoEnterEnabled") var autoEnterEnabled: Bool = false
+    @Published var autoEnterEnabled: Bool {
+        didSet { Self.defaults.set(autoEnterEnabled, forKey: "autoEnterEnabled") }
+    }
 
     /// The text insertion method: typing simulation or clipboard paste.
-    @AppStorage("insertionMethod") var insertionMethod: InsertionMethod = .typing
+    @Published var insertionMethod: InsertionMethod {
+        didSet { Self.defaults.set(insertionMethod.rawValue, forKey: "insertionMethod") }
+    }
 
     /// Whether to show the floating recording overlay during recording.
-    @AppStorage("showOverlay") var showOverlay: Bool = true
+    @Published var showOverlay: Bool {
+        didSet { Self.defaults.set(showOverlay, forKey: "showOverlay") }
+    }
 
-    private init() {}
+    private init() {
+        let d = Self.defaults
+        self.codeword = d.string(forKey: "codeword") ?? "over"
+        self.autoEnterEnabled = d.bool(forKey: "autoEnterEnabled")
+        self.insertionMethod = InsertionMethod(rawValue: d.string(forKey: "insertionMethod") ?? "") ?? .typing
+        self.showOverlay = d.object(forKey: "showOverlay") == nil ? true : d.bool(forKey: "showOverlay")
+    }
 }
 
 // InsertionMethod is already RawRepresentable<String> via the String raw value,

@@ -46,14 +46,15 @@ struct aihelperApp: App {
 ///
 /// Uses NSWindow directly instead of SwiftUI Window scene because
 /// @Environment(\.openWindow) is unreliable from MenuBarExtra in LSUIElement apps.
-final class SettingsWindowController {
+final class SettingsWindowController: NSObject, NSWindowDelegate {
     static let shared = SettingsWindowController()
     private var window: NSWindow?
 
     func showWindow() {
         if let existing = window, existing.isVisible {
-            existing.makeKeyAndOrderFront(nil)
+            NSApp.setActivationPolicy(.regular)
             NSApp.activate(ignoringOtherApps: true)
+            existing.makeKeyAndOrderFront(nil)
             return
         }
 
@@ -67,13 +68,19 @@ final class SettingsWindowController {
         window.contentView = NSHostingView(rootView: SettingsView())
         window.center()
         window.isReleasedWhenClosed = false
+        window.delegate = self
         self.window = window
 
-        // For LSUIElement apps the activation must happen after a brief delay
-        // so the menu bar dropdown has time to dismiss first.
+        // LSUIElement apps must temporarily become .regular to accept keyboard input.
         DispatchQueue.main.async {
+            NSApp.setActivationPolicy(.regular)
             NSApp.activate(ignoringOtherApps: true)
             window.makeKeyAndOrderFront(nil)
         }
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        // Revert to accessory so the app disappears from Dock again.
+        NSApp.setActivationPolicy(.accessory)
     }
 }
