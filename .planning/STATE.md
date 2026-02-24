@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Press a hotkey, speak, and the text appears where your cursor is -- reliably, locally, without any cloud dependency.
-**Current focus:** Phase 2: Transcription & Text Insertion
+**Current focus:** Phase 3: Codeword, Overlay & Settings
 
 ## Current Position
 
-Phase: 2 of 3 (Transcription & Text Insertion)
-Plan: 2 of 2 in current phase
-Status: Phase 2 Complete (all plans and checkpoints approved)
-Last activity: 2026-02-24 -- Completed 02-02-PLAN.md (checkpoint approved, full pipeline verified)
+Phase: 3 of 3 (Codeword, Overlay & Settings)
+Plan: 1 of 3 in current phase
+Status: Executing Phase 3
+Last activity: 2026-02-24 -- Completed 03-01-PLAN.md (settings infrastructure, settings panel, auto-Enter wiring)
 
-Progress: [████████░░] 80%
+Progress: [████████▓░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3min
-- Total execution time: 0.18 hours
+- Total execution time: 0.22 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████████░░] 80%
 | Phase 01 P02 | 5min | 3 tasks | 4 files |
 | Phase 02 P01 | 2min | 2 tasks | 4 files |
 | Phase 02 P02 | 2min | 2 tasks | 3 files |
+| Phase 03 P01 | 2min | 2 tasks | 5 files |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 5min, 2min, 2min
+- Last 5 plans: 5min, 2min, 2min, 2min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -54,6 +55,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Actor pattern for TranscriptionManager to prevent concurrent access to whisper context pointer
 - [Phase 02]: CGEvent typing simulation as primary text insertion with clipboard paste fallback for robustness
 - [Phase 02]: Model initialization dispatched from MenuBarManager.init() via Task for cleanest @StateObject timing
+- [Phase 03]: Used @AppStorage on SettingsManager singleton for automatic UserDefaults persistence with SwiftUI reactivity
+- [Phase 03]: Used Window scene with openWindow(id:) instead of Settings scene -- Settings scene conflicts with menu-bar-only apps
+- [Phase 03]: Extracted MenuBarContentView from App body to enable @Environment(\.openWindow) in menu bar dropdown
+- [Phase 03]: InsertionMethod as String-backed enum for direct @AppStorage compatibility
 
 ### Pending Todos
 
@@ -66,5 +71,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 02-02-PLAN.md (checkpoint approved, Phase 2 fully complete)
+Stopped at: Completed 03-01-PLAN.md (settings infrastructure, settings panel, auto-Enter wiring)
 Resume file: None

@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **REC-01**: User can start voice recording with a global hotkey from any app
 - [x] **REC-02**: User can stop voice recording by pressing the global hotkey again
 - [ ] **REC-03**: User can stop voice recording by saying a codeword (default: "over") detected live during recording
-- [ ] **REC-04**: User can configure the stop codeword in settings
+- [x] **REC-04**: User can configure the stop codeword in settings
 - [x] **REC-05**: App captures microphone audio during recording
 
 ### Transcription
@@ -25,14 +25,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **INS-01**: Transcribed text is inserted at the current cursor position in the active app (simulated typing)
 - [x] **INS-02**: App falls back to clipboard paste (Cmd+V) when typing simulation fails
-- [ ] **INS-03**: User can toggle auto-send Enter after text insertion in settings
+- [x] **INS-03**: User can toggle auto-send Enter after text insertion in settings
 
 ### UI & Feedback
 
 - [x] **UI-01**: App runs as a macOS menu bar app (no dock icon)
 - [x] **UI-02**: Menu bar icon indicates current state (idle, recording, transcribing)
 - [ ] **UI-03**: Mini floating overlay appears during recording showing status/waveform
-- [ ] **UI-04**: Settings panel accessible from menu bar for configuring hotkey, codeword, Enter toggle, insertion method
+- [x] **UI-04**: Settings panel accessible from menu bar for configuring hotkey, codeword, Enter toggle, insertion method
 
 ## v2 Requirements
 
@@ -71,18 +71,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REC-01 | Phase 1 | Complete |
 | REC-02 | Phase 1 | Complete |
 | REC-03 | Phase 3 | Pending |
-| REC-04 | Phase 3 | Pending |
+| REC-04 | Phase 3 | Complete |
 | REC-05 | Phase 1 | Complete |
 | TRX-01 | Phase 2 | Complete |
 | TRX-02 | Phase 2 | Complete |
 | TRX-03 | Phase 2 | Complete |
 | INS-01 | Phase 2 | Complete |
 | INS-02 | Phase 2 | Complete |
-| INS-03 | Phase 3 | Pending |
+| INS-03 | Phase 3 | Complete |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 1 | Complete |
 | UI-03 | Phase 3 | Pending |
-| UI-04 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 15 total
