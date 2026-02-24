@@ -22,4 +22,10 @@ struct aihelperApp: App {
             .keyboardShortcut("q")
         }
     }
+
+    init() {
+        // Check and prompt for Accessibility permissions on launch.
+        // CGEvent taps require this to intercept global key events.
+        HotkeyManager.ensureAccessibilityPermission()
+    }
 }
