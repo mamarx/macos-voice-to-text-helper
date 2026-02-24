@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 of 3 (Codeword, Overlay & Settings)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing Phase 3
-Last activity: 2026-02-24 -- Completed 03-01-PLAN.md (settings infrastructure, settings panel, auto-Enter wiring)
+Last activity: 2026-02-24 -- Completed 03-02-PLAN.md (live codeword detection with rolling buffer whisper transcription)
 
-Progress: [████████▓░] 87%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 3min
-- Total execution time: 0.22 hours
+- Total execution time: 0.25 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [████████▓░] 87%
 | Phase 02 P01 | 2min | 2 tasks | 4 files |
 | Phase 02 P02 | 2min | 2 tasks | 3 files |
 | Phase 03 P01 | 2min | 2 tasks | 5 files |
+| Phase 03 P02 | 2min | 2 tasks | 3 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 2min, 2min, 2min, 2min
+- Last 5 plans: 2min, 2min, 2min, 2min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -59,6 +60,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Used Window scene with openWindow(id:) instead of Settings scene -- Settings scene conflicts with menu-bar-only apps
 - [Phase 03]: Extracted MenuBarContentView from App body to enable @Environment(\.openWindow) in menu bar dropdown
 - [Phase 03]: InsertionMethod as String-backed enum for direct @AppStorage compatibility
+- [Phase 03]: Used class (not actor) for CodewordDetector with serial DispatchQueue -- audio tap requires synchronous appendAudio
+- [Phase 03]: Separate whisper context per detection session -- lightweight, OS memory-maps model weights
+- [Phase 03]: 2-second detection interval with 4-second rolling buffer for codeword latency/CPU balance
 
 ### Pending Todos
 
@@ -71,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-01-PLAN.md (settings infrastructure, settings panel, auto-Enter wiring)
+Stopped at: Completed 03-02-PLAN.md (live codeword detection with rolling buffer whisper transcription)
 Resume file: None
