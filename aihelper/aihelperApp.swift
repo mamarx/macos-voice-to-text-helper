@@ -10,16 +10,29 @@ struct aihelperApp: App {
         // providing dynamic icon updates across three states:
         // idle (mic), recording (mic.fill), transcribing (text.bubble).
         MenuBarExtra("aihelper", systemImage: menuBarManager.statusIconName) {
-            MenuBarContentView(menuBarManager: menuBarManager)
-        }
+            Button(menuBarManager.isTranscribing ? "Transcribing..." :
+                   menuBarManager.isRecording ? "Stop Recording" : "Toggle Recording") {
+                if !menuBarManager.isTranscribing {
+                    menuBarManager.toggleRecording()
+                }
+            }
+            .keyboardShortcut("r")
+            .disabled(menuBarManager.isTranscribing)
 
-        // Settings window — opened on demand from the menu bar.
-        // Uses a Window scene with a stable id so the same window is reused.
-        Window("aihelper Settings", id: "settings") {
-            SettingsView()
+            Divider()
+
+            Button("Settings...") {
+                SettingsWindowController.shared.showWindow()
+            }
+            .keyboardShortcut(",")
+
+            Divider()
+
+            Button("Quit") {
+                NSApplication.shared.terminate(nil)
+            }
+            .keyboardShortcut("q")
         }
-        .windowResizability(.contentSize)
-        .defaultSize(width: 450, height: 400)
     }
 
     init() {
@@ -29,37 +42,38 @@ struct aihelperApp: App {
     }
 }
 
-/// Menu bar dropdown content extracted into a View so we can use @Environment(\.openWindow).
+/// Manages a single NSWindow hosting SettingsView.
 ///
-/// @Environment only works inside View conformers, not directly in the App struct.
-/// This view provides the recording toggle, settings button, and quit button.
-private struct MenuBarContentView: View {
-    @ObservedObject var menuBarManager: MenuBarManager
-    @Environment(\.openWindow) private var openWindow
+/// Uses NSWindow directly instead of SwiftUI Window scene because
+/// @Environment(\.openWindow) is unreliable from MenuBarExtra in LSUIElement apps.
+final class SettingsWindowController {
+    static let shared = SettingsWindowController()
+    private var window: NSWindow?
 
-    var body: some View {
-        Button(menuBarManager.isTranscribing ? "Transcribing..." :
-               menuBarManager.isRecording ? "Stop Recording" : "Toggle Recording") {
-            if !menuBarManager.isTranscribing {
-                menuBarManager.toggleRecording()
-            }
-        }
-        .keyboardShortcut("r")
-        .disabled(menuBarManager.isTranscribing)
-
-        Divider()
-
-        Button("Settings...") {
+    func showWindow() {
+        if let existing = window, existing.isVisible {
+            existing.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
-            openWindow(id: "settings")
+            return
         }
-        .keyboardShortcut(",")
 
-        Divider()
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 450, height: 400),
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "aihelper Settings"
+        window.contentView = NSHostingView(rootView: SettingsView())
+        window.center()
+        window.isReleasedWhenClosed = false
+        self.window = window
 
-        Button("Quit") {
-            NSApplication.shared.terminate(nil)
+        // For LSUIElement apps the activation must happen after a brief delay
+        // so the menu bar dropdown has time to dismiss first.
+        DispatchQueue.main.async {
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
         }
-        .keyboardShortcut("q")
     }
 }
