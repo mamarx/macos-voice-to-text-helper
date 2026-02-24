@@ -28,6 +28,9 @@ final class MenuBarManager: ObservableObject {
     /// Codeword detector — listens for the stop word during recording.
     private let codewordDetector = CodewordDetector()
 
+    /// Floating overlay window — shows recording indicator without stealing focus.
+    private let overlayWindow = RecordingOverlayWindow()
+
     /// Centralized settings — codeword, autoEnter, insertionMethod, overlay toggle.
     /// Stored here so other plans (02, 03) can read settings from the pipeline orchestrator.
     let settings = SettingsManager.shared
@@ -114,10 +117,17 @@ final class MenuBarManager: ObservableObject {
 
         audioCaptureManager.startCapture()
         isRecording = true
+
+        if settings.showOverlay {
+            overlayWindow.show()
+        }
+
         print("[MenuBarManager] Recording started")
     }
 
     private func stopRecording() {
+        overlayWindow.hide()
+
         codewordDetector.stop()
         audioCaptureManager.codewordDetector = nil
 
@@ -186,6 +196,7 @@ final class MenuBarManager: ObservableObject {
 
     deinit {
         hotkeyManager.stop()
+        overlayWindow.hide()
         if isRecording {
             audioCaptureManager.stopCapture()
         }
