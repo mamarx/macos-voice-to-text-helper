@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import whisper
 
 /// Manages the menu bar icon state and orchestrates the full voice-to-text pipeline:
 /// hotkey press -> record audio -> transcribe via whisper -> insert text at cursor.
@@ -30,6 +31,11 @@ final class MenuBarManager: ObservableObject {
 
     /// Floating overlay window — shows recording indicator without stealing focus.
     private let overlayWindow = RecordingOverlayWindow()
+
+    /// Pre-warmed whisper context for codeword detection (tiny model).
+    /// Created once at app launch and reused across all recording sessions,
+    /// eliminating ~300-500ms context creation overhead per session.
+    private var codewordContext: OpaquePointer?
 
     /// Centralized settings — codeword, autoEnter, insertionMethod, overlay toggle.
     /// Stored here so other plans (02, 03) can read settings from the pipeline orchestrator.
@@ -72,19 +78,39 @@ final class MenuBarManager: ObservableObject {
 
     // MARK: - Transcription Initialization
 
-    /// Downloads the whisper model (if needed) and creates the transcription context.
+    /// Downloads whisper models (if needed), creates transcription context, and pre-warms
+    /// the codeword detection context from the tiny model.
     func initializeTranscription() async {
         do {
+            // Download and load the base model for main transcription
             if !ModelManager.shared.isModelDownloaded {
-                print("[MenuBarManager] Downloading whisper model...")
+                print("[MenuBarManager] Downloading whisper base model...")
                 try await ModelManager.shared.downloadModel { progress in
-                    print("[MenuBarManager] Model download: \(Int(progress * 100))%")
+                    print("[MenuBarManager] Base model download: \(Int(progress * 100))%")
                 }
             }
 
             let manager = try TranscriptionManager.createContext(path: ModelManager.shared.modelPath)
             transcriptionManager = manager
             print("[MenuBarManager] Transcription model loaded successfully")
+
+            // Download and pre-warm the tiny model for codeword detection
+            if !ModelManager.shared.isTinyModelDownloaded {
+                print("[MenuBarManager] Downloading whisper tiny model for codeword detection...")
+                try await ModelManager.shared.downloadTinyModel { progress in
+                    print("[MenuBarManager] Tiny model download: \(Int(progress * 100))%")
+                }
+            }
+
+            var contextParams = whisper_context_default_params()
+            contextParams.flash_attn = true
+
+            if let ctx = whisper_init_from_file_with_params(ModelManager.shared.tinyModelPath, contextParams) {
+                codewordContext = ctx
+                print("[MenuBarManager] Codeword context pre-warmed (tiny model)")
+            } else {
+                print("[MenuBarManager] Warning: failed to create codeword context from tiny model")
+            }
         } catch {
             print("[MenuBarManager] Failed to initialize transcription: \(error)")
         }
@@ -113,7 +139,11 @@ final class MenuBarManager: ObservableObject {
                 self?.stopRecording()
             }
         }
-        codewordDetector.start(modelPath: ModelManager.shared.modelPath)
+        if let ctx = codewordContext {
+            codewordDetector.start(context: ctx)
+        } else {
+            print("[MenuBarManager] Warning: codeword context not available, codeword detection disabled")
+        }
 
         audioCaptureManager.startCapture()
         isRecording = true
@@ -197,8 +227,13 @@ final class MenuBarManager: ObservableObject {
     deinit {
         hotkeyManager.stop()
         overlayWindow.hide()
+        codewordDetector.shutdown()
         if isRecording {
             audioCaptureManager.stopCapture()
+        }
+        if let ctx = codewordContext {
+            whisper_free(ctx)
+            codewordContext = nil
         }
     }
 }

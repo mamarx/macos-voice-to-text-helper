@@ -21,6 +21,15 @@ final class ModelManager {
     /// The model filename.
     private let modelFileName = "ggml-base.bin"
 
+    /// Download URL for the ggml-tiny whisper model (~75MB).
+    ///
+    /// Used exclusively for codeword detection where speed matters more than
+    /// multi-language accuracy. The tiny model is ~5x faster per inference pass.
+    private let tinyModelDownloadURL = URL(string: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin")!
+
+    /// The tiny model filename.
+    private let tinyModelFileName = "ggml-tiny.bin"
+
     private init() {}
 
     // MARK: - Path Management
@@ -47,9 +56,21 @@ final class ModelManager {
         modelDirectoryURL.appendingPathComponent(modelFileName).path
     }
 
-    /// Whether the model file has already been downloaded and exists on disk.
+    /// Full path string to the ggml-tiny.bin model file.
+    ///
+    /// Used by CodewordDetector for fast codeword detection.
+    var tinyModelPath: String {
+        modelDirectoryURL.appendingPathComponent(tinyModelFileName).path
+    }
+
+    /// Whether the base model file has already been downloaded and exists on disk.
     var isModelDownloaded: Bool {
         FileManager.default.fileExists(atPath: modelPath)
+    }
+
+    /// Whether the tiny model file has already been downloaded and exists on disk.
+    var isTinyModelDownloaded: Bool {
+        FileManager.default.fileExists(atPath: tinyModelPath)
     }
 
     // MARK: - Download
@@ -107,6 +128,56 @@ final class ModelManager {
 
         } catch {
             // Clean up temp file on failure
+            try? FileManager.default.removeItem(at: tempURL)
+            throw ModelDownloadError.downloadFailed(underlying: error)
+        }
+    }
+
+    /// Downloads the tiny whisper model from HuggingFace if not already present.
+    ///
+    /// Same streaming download pattern as `downloadModel()`. The tiny model is ~75MB.
+    ///
+    /// - Parameter progress: Callback reporting download progress from 0.0 to 1.0.
+    /// - Throws: If the download or file operations fail.
+    func downloadTinyModel(progress: @escaping (Double) -> Void) async throws {
+        // Skip if already downloaded
+        guard !isTinyModelDownloaded else {
+            progress(1.0)
+            return
+        }
+
+        let finalURL = modelDirectoryURL.appendingPathComponent(tinyModelFileName)
+        let tempURL = modelDirectoryURL.appendingPathComponent(tinyModelFileName + ".download")
+
+        // Clean up any previous incomplete download
+        try? FileManager.default.removeItem(at: tempURL)
+
+        do {
+            let (asyncBytes, response) = try await URLSession.shared.bytes(from: tinyModelDownloadURL)
+
+            let expectedLength = response.expectedContentLength
+            var receivedLength: Int64 = 0
+
+            var data = Data()
+            data.reserveCapacity(expectedLength > 0 ? Int(expectedLength) : 80_000_000)
+
+            for try await byte in asyncBytes {
+                data.append(byte)
+                receivedLength += 1
+
+                if receivedLength % (1024 * 1024) == 0, expectedLength > 0 {
+                    let fraction = Double(receivedLength) / Double(expectedLength)
+                    progress(min(fraction, 0.99))
+                }
+            }
+
+            try data.write(to: tempURL)
+            try FileManager.default.moveItem(at: tempURL, to: finalURL)
+
+            progress(1.0)
+            print("[ModelManager] Tiny model downloaded successfully (\(data.count) bytes)")
+
+        } catch {
             try? FileManager.default.removeItem(at: tempURL)
             throw ModelDownloadError.downloadFailed(underlying: error)
         }

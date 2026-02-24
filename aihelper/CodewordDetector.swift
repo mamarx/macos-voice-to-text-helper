@@ -4,10 +4,13 @@ import whisper
 /// Detects a spoken codeword during live recording using periodic whisper transcription
 /// of a rolling audio buffer.
 ///
-/// Architecture: Maintains a rolling buffer of recent audio (~4 seconds at 16kHz).
-/// Every ~2 seconds, runs a whisper transcription pass on the buffer and checks if
+/// Architecture: Maintains a rolling buffer of recent audio (~2 seconds at 16kHz).
+/// Every ~1 second, runs a whisper transcription pass on the buffer and checks if
 /// the configured codeword appears in the output. When detected, fires the
 /// `onCodewordDetected` callback so the recording pipeline can stop automatically.
+///
+/// The whisper context is owned externally (pre-warmed at app launch) and passed in
+/// via `start(context:)`. This eliminates ~300-500ms context creation per recording session.
 ///
 /// This is a class (not actor) because `appendAudio` is called synchronously from the
 /// audio tap callback. Thread safety is handled via a serial DispatchQueue.
@@ -19,10 +22,10 @@ final class CodewordDetector {
     /// Rolling buffer of 16kHz mono Float samples.
     private var audioBuffer: [Float] = []
 
-    /// Maximum buffer size: ~2 seconds at 16kHz (short buffer for fast detection).
+    /// Maximum buffer size: ~2 seconds at 16kHz (a single codeword is well under 2s).
     private let maxBufferSamples = 16000 * 2
 
-    /// Whisper context for codeword detection (separate from main transcription context).
+    /// Whisper context for codeword detection (externally owned, reused across sessions).
     private var whisperContext: OpaquePointer?
 
     /// Timer for periodic transcription checks.
@@ -34,28 +37,31 @@ final class CodewordDetector {
     /// Serial queue for buffer access and transcription.
     private let queue = DispatchQueue(label: "com.aihelper.codeword", qos: .userInteractive)
 
+    /// Pre-allocated C string for the English language hint, avoiding dangling pointer issues.
+    /// Codeword "over" is English -- explicit hint skips auto-detect (~200ms saved per check).
+    private let languageHint: UnsafeMutablePointer<CChar>
+
+    init() {
+        languageHint = strdup("en")!
+    }
+
+    deinit {
+        free(languageHint)
+    }
+
     // MARK: - Lifecycle
 
-    /// Starts codeword detection by creating a whisper context and scheduling periodic checks.
+    /// Starts codeword detection using a pre-warmed whisper context.
     ///
-    /// Creates a separate (lightweight) whisper context that reuses the same model file.
-    /// The OS memory-maps the model weights so the overhead is minimal (~20MB).
+    /// The context is owned externally (by MenuBarManager) and reused across recording
+    /// sessions. This eliminates ~300-500ms context creation overhead per session.
     ///
-    /// - Parameter modelPath: Absolute path to the whisper model file (e.g. ggml-base.bin).
-    func start(modelPath: String) {
+    /// - Parameter context: Pre-created whisper context (from tiny model with flash_attn).
+    func start(context: OpaquePointer) {
         queue.async { [self] in
             guard !isActive else { return }
 
-            // Create whisper context with Metal acceleration
-            var contextParams = whisper_context_default_params()
-            contextParams.flash_attn = true
-
-            guard let ctx = whisper_init_from_file_with_params(modelPath, contextParams) else {
-                print("[CodewordDetector] Failed to create whisper context from \(modelPath)")
-                return
-            }
-
-            whisperContext = ctx
+            whisperContext = context
             audioBuffer.removeAll()
             isActive = true
 
@@ -68,11 +74,14 @@ final class CodewordDetector {
             timer.resume()
             detectionTimer = timer
 
-            print("[CodewordDetector] Started — checking every 2s")
+            print("[CodewordDetector] Started with pre-warmed context")
         }
     }
 
-    /// Stops codeword detection, cancels timer, clears buffer, and frees whisper context.
+    /// Stops codeword detection, cancels timer, and clears buffer.
+    ///
+    /// Does NOT free the whisper context -- it is owned externally and will be
+    /// reused across recording sessions. Call `shutdown()` on app termination.
     ///
     /// Safe to call multiple times.
     func stop() {
@@ -84,13 +93,23 @@ final class CodewordDetector {
             detectionTimer = nil
 
             audioBuffer.removeAll()
-
-            if let ctx = whisperContext {
-                whisper_free(ctx)
-                whisperContext = nil
-            }
+            whisperContext = nil  // Release reference, don't free (externally owned)
 
             print("[CodewordDetector] Stopped")
+        }
+    }
+
+    /// Frees the whisper context. Called only on app termination.
+    ///
+    /// After calling this, the context pointer is invalid and must not be reused.
+    func shutdown() {
+        queue.sync {
+            isActive = false
+            detectionTimer?.cancel()
+            detectionTimer = nil
+            audioBuffer.removeAll()
+            // Context is freed by the owner (MenuBarManager), just nil our reference
+            whisperContext = nil
         }
     }
 
@@ -120,11 +139,13 @@ final class CodewordDetector {
     /// Runs whisper transcription on the current buffer and checks for the codeword.
     ///
     /// Called on the serial queue by the detection timer.
+    /// Optimized params: explicit English language, reduced audio_ctx (256), temperature 0,
+    /// adaptive thread count.
     private func checkForCodeword() {
         guard isActive, let ctx = whisperContext else { return }
 
-        // Need at least 0.5 seconds of audio (8000 samples at 16kHz)
-        guard audioBuffer.count >= 8000 else { return }
+        // Need at least 0.3 seconds of audio (4800 samples at 16kHz)
+        guard audioBuffer.count >= 4800 else { return }
 
         // Configure whisper for fast, single-pass detection
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
@@ -133,11 +154,12 @@ final class CodewordDetector {
         params.print_timestamps = false
         params.print_special = false
         params.translate = false
-        params.language = nil  // Auto-detect (German + English)
-        params.n_threads = 6
+        params.language = UnsafePointer(languageHint)  // English hint -- skip auto-detect
+        params.n_threads = Int32(max(4, ProcessInfo.processInfo.processorCount - 2))
         params.no_context = true
         params.single_segment = true
-        params.audio_ctx = 512  // Limit audio context for shorter processing
+        params.audio_ctx = 256  // 256 * ~10ms = 2.56s coverage, sufficient for 2s buffer
+        params.temperature = 0.0  // Deterministic greedy for single known word
 
         // Run transcription on buffer contents
         let result = audioBuffer.withUnsafeBufferPointer { bufferPointer in
@@ -174,10 +196,8 @@ final class CodewordDetector {
             detectionTimer?.cancel()
             detectionTimer = nil
             audioBuffer.removeAll()
-            if let ctx = whisperContext {
-                whisper_free(ctx)
-                whisperContext = nil
-            }
+            // Do NOT free context -- it's externally owned and will be reused
+            whisperContext = nil
             callback?()
         }
     }
