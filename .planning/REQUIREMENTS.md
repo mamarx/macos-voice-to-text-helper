@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Text Insertion
 
-- [ ] **INS-01**: Transcribed text is inserted at the current cursor position in the active app (simulated typing)
-- [ ] **INS-02**: App falls back to clipboard paste (Cmd+V) when typing simulation fails
+- [x] **INS-01**: Transcribed text is inserted at the current cursor position in the active app (simulated typing)
+- [x] **INS-02**: App falls back to clipboard paste (Cmd+V) when typing simulation fails
 - [ ] **INS-03**: User can toggle auto-send Enter after text insertion in settings
 
 ### UI & Feedback
@@ -76,8 +76,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRX-01 | Phase 2 | Complete |
 | TRX-02 | Phase 2 | Complete |
 | TRX-03 | Phase 2 | Complete |
-| INS-01 | Phase 2 | Pending |
-| INS-02 | Phase 2 | Pending |
+| INS-01 | Phase 2 | Complete |
+| INS-02 | Phase 2 | Complete |
 | INS-03 | Phase 3 | Pending |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 1 | Complete |
