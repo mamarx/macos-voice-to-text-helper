@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Recording & Control
 
-- [ ] **REC-01**: User can start voice recording with a global hotkey from any app
-- [ ] **REC-02**: User can stop voice recording by pressing the global hotkey again
+- [x] **REC-01**: User can start voice recording with a global hotkey from any app
+- [x] **REC-02**: User can stop voice recording by pressing the global hotkey again
 - [ ] **REC-03**: User can stop voice recording by saying a codeword (default: "over") detected live during recording
 - [ ] **REC-04**: User can configure the stop codeword in settings
-- [ ] **REC-05**: App captures microphone audio during recording
+- [x] **REC-05**: App captures microphone audio during recording
 
 ### Transcription
 
@@ -68,11 +68,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REC-01 | Phase 1 | Pending |
-| REC-02 | Phase 1 | Pending |
+| REC-01 | Phase 1 | Complete |
+| REC-02 | Phase 1 | Complete |
 | REC-03 | Phase 3 | Pending |
 | REC-04 | Phase 3 | Pending |
-| REC-05 | Phase 1 | Pending |
+| REC-05 | Phase 1 | Complete |
 | TRX-01 | Phase 2 | Pending |
 | TRX-02 | Phase 2 | Pending |
 | TRX-03 | Phase 2 | Pending |
