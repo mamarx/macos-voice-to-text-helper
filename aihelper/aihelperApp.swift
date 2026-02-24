@@ -7,12 +7,17 @@ struct aihelperApp: App {
     var body: some Scene {
         // Menu bar only app — no WindowGroup, no dock icon (LSUIElement=true in Info.plist).
         // The systemImage parameter re-evaluates when menuBarManager.statusIconName changes,
-        // providing dynamic icon updates between idle (mic) and recording (mic.fill) states.
+        // providing dynamic icon updates across three states:
+        // idle (mic), recording (mic.fill), transcribing (text.bubble).
         MenuBarExtra("aihelper", systemImage: menuBarManager.statusIconName) {
-            Button(menuBarManager.isRecording ? "Stop Recording" : "Toggle Recording") {
-                menuBarManager.toggleRecording()
+            Button(menuBarManager.isTranscribing ? "Transcribing..." :
+                   menuBarManager.isRecording ? "Stop Recording" : "Toggle Recording") {
+                if !menuBarManager.isTranscribing {
+                    menuBarManager.toggleRecording()
+                }
             }
             .keyboardShortcut("r")
+            .disabled(menuBarManager.isTranscribing)
 
             Divider()
 
