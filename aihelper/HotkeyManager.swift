@@ -21,6 +21,12 @@ final class HotkeyManager {
     /// Run loop source for the event tap.
     private var runLoopSource: CFRunLoopSource?
 
+    /// Backup NSEvent global monitor for when the CGEvent tap is disabled by the system.
+    private var globalMonitor: Any?
+
+    /// Debounce timestamp to prevent double-fire from both CGEvent tap and NSEvent monitor.
+    private var lastToggleTime: TimeInterval = 0
+
     // MARK: - Accessibility Permission
 
     /// Checks if Accessibility permission is granted.
@@ -83,7 +89,7 @@ final class HotkeyManager {
 
                 if hasControl && hasShift && !hasCommand && !hasOption {
                     DispatchQueue.main.async {
-                        manager.onToggle?()
+                        manager.fireToggle()
                     }
                     // Consume the event so it doesn't pass through to other apps
                     return nil
@@ -106,7 +112,33 @@ final class HotkeyManager {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
 
+        // Backup: NSEvent global monitor catches hotkey events when the CGEvent tap
+        // is temporarily disabled by the system (e.g. under heavy CPU load from whisper).
+        // The CGEvent tap consumes events (returns nil) so the monitor only fires
+        // when the tap is disabled and events leak through.
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self else { return }
+            guard event.keyCode == self.keyCode else { return }
+
+            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            if flags.contains(.control) && flags.contains(.shift)
+                && !flags.contains(.command) && !flags.contains(.option) {
+                DispatchQueue.main.async {
+                    self.fireToggle()
+                }
+            }
+        }
+
         print("[HotkeyManager] Global hotkey registered: Ctrl+Shift+Space")
+    }
+
+    /// Fires the toggle callback with debounce to prevent double-fire
+    /// when both CGEvent tap and NSEvent monitor catch the same event.
+    func fireToggle() {
+        let now = ProcessInfo.processInfo.systemUptime
+        guard now - lastToggleTime > 0.5 else { return }
+        lastToggleTime = now
+        onToggle?()
     }
 
     /// Disables and removes the event tap.
@@ -119,6 +151,12 @@ final class HotkeyManager {
         }
         eventTap = nil
         runLoopSource = nil
+
+        if let monitor = globalMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalMonitor = nil
+        }
+
         print("[HotkeyManager] Global hotkey unregistered")
     }
 
